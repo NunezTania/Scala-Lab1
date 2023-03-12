@@ -13,7 +13,13 @@ trait Tokenized:
 
 class TokenizedImpl(val tokens: Array[(String, Token)]) extends Tokenized:
 // TODO - Part 1 Step 3
+// CHECK if the function should be a cover function
+  var counter = 0
   def nextToken(): (String, Token) =
-    return ("test", Token.EOL)
+    if counter < tokens.length then
+      val token = tokens(counter)
+      counter += 1
+      token
+    else ("EOL", Token.EOL)
 
 end TokenizedImpl

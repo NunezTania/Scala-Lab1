@@ -25,6 +25,6 @@ object ClinksCalculator:
     */
   // TODO - Part 1 Step 1
   def calculateCombination(n: Int, k: Int): Int =
-    // use the factorial function to calculate the combination but result in Int
+    // CHECK conversion long to int ok
     (factorial(n) / (factorial(k) * factorial(n - k))).toInt
 end ClinksCalculator

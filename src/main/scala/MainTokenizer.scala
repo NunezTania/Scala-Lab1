@@ -18,10 +18,10 @@ object MainTokenizer:
       case "quitter" =>
         println("Adieu.")
         false // close loop
-      case "santé !" =>
+      case "sante !" => // sur windows le e accent aigu n'est pas encodé correctement
         for i <- 2 to 6 do
           println(
-            s"Nombre de *clinks* pour un santé de $i personnes : ${ClinksCalculator
+            s"Nombre de *clinks* pour un sante de $i personnes : ${ClinksCalculator
                 .calculateCombination(i, 2)}."
           )
         true // continue loop

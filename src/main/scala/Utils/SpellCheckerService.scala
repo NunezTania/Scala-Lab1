@@ -45,23 +45,7 @@ class SpellCheckerImpl(val dictionary: Map[String, String])
 
   // TODO - Part 1 Step 2
   def getClosestWordInDictionary(misspelledWord: String): String =
-    // CASE ONE if the misspelled word is a number or a pseudonym
-    if misspelledWord.matches("[0-9]+") || misspelledWord.startsWith("_") then
-      misspelledWord
-    else
-
-    // CASE TWO if the misspelled word is in the dictionary
-    if dictionary.contains(misspelledWord) then dictionary(misspelledWord)
-    else
-
-      // CASE THREE if the misspelled word is not in the dictionary
-      val closestkey = dictionary.keys.minBy(stringDistance(_, misspelledWord))
-      if stringDistance(
-          dictionary(closestkey),
-          misspelledWord
-        ) >= misspelledWord
-          .length()
-      then "bad"
-      else dictionary(closestkey)
+      if misspelledWord.matches("[0-9]+") || misspelledWord.startsWith("_") then misspelledWord
+      else dictionary(dictionary.keys.minBy(stringDistance(_, misspelledWord)))
 
 end SpellCheckerImpl

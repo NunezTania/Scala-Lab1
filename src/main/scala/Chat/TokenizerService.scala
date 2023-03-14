@@ -20,7 +20,8 @@ class TokenizerService(spellCheckerSvc: SpellCheckerService):
 
     var words = input
       .replaceAll("[.,!?*]", "")
-      .replaceAll("['  ]", " ")
+      .replaceAll("'", " ")
+      .replaceAll(" {2,}", " ")
       .split(" ")
       .map(word => spellCheckerSvc.getClosestWordInDictionary(word))
       .map(word => (word, convertWordToToken(word)))

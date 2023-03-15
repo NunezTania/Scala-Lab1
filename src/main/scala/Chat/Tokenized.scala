@@ -12,8 +12,9 @@ trait Tokenized:
   def nextToken(): (String, Token)
 
 class TokenizedImpl(val tokens: Array[(String, Token)]) extends Tokenized:
-// TODO - Part 1 Step 3
+
   var counter = 0
+
   def nextToken(): (String, Token) =
     if counter < tokens.length then
       val token = tokens(counter)

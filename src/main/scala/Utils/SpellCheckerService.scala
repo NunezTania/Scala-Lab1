@@ -31,7 +31,6 @@ end SpellCheckerService
 
 class SpellCheckerImpl(val dictionary: Map[String, String])
     extends SpellCheckerService:
-  // TODO - Part 1 Step 2
   def stringDistance(s1: String, s2: String): Int =
     val l1 = s1.length()
     val l2 = s2.length()
@@ -45,7 +44,8 @@ class SpellCheckerImpl(val dictionary: Map[String, String])
 
   // TODO - Part 1 Step 2
   def getClosestWordInDictionary(misspelledWord: String): String =
-      if misspelledWord.matches("[0-9]+") || misspelledWord.startsWith("_") then misspelledWord
-      else dictionary(dictionary.keys.minBy(stringDistance(_, misspelledWord)))
+    if misspelledWord.matches("[0-9]+") || misspelledWord.startsWith("_") then
+      misspelledWord
+    else dictionary(dictionary.keys.minBy(stringDistance(_, misspelledWord)))
 
 end SpellCheckerImpl

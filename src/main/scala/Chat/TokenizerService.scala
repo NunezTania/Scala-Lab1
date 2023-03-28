@@ -11,11 +11,10 @@ class TokenizerService(spellCheckerSvc: SpellCheckerService):
     * @return
     *   A Tokenizer which allows iteration over the tokens of the input
     */
-  // TODO - Part 1 Step 3
   def tokenize(input: String): Tokenized =
     // 0. remove punctuation  (. , ! ? *) and replace ' and long space by a simple space
     // 1. split the input by space
-    // 2. normalize each word by using the dictionnary (spellCheckerSvc -> getClosestWordInDictionary)
+    // 2. normalize each word by using the dictionnary
     // 3. for each word, find his equivalent token and create a tuple (word, token)
 
     var words = input
@@ -28,6 +27,12 @@ class TokenizerService(spellCheckerSvc: SpellCheckerService):
 
     return TokenizedImpl(words)
 
+  /** Convert a normalized word to a token
+    * @param word
+    *   The word to convert
+    * @return
+    *   The token corresponding to the word
+    */
   def convertWordToToken(word: String): Token =
     word match
       case w if w.matches("[0-9]+") => Token.NUM

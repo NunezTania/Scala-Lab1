@@ -42,7 +42,6 @@ class SpellCheckerImpl(val dictionary: Map[String, String])
         .min(stringDistance(s1, s2.substring((1))))
         .min(stringDistance(s1.substring(1), s2.substring(1)))
 
-  // TODO - Part 1 Step 2
   def getClosestWordInDictionary(misspelledWord: String): String =
     if misspelledWord.matches("[0-9]+") || misspelledWord.startsWith("_") then
       misspelledWord

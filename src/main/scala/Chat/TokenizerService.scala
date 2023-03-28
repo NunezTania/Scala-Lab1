@@ -48,6 +48,24 @@ class TokenizerService(spellCheckerSvc: SpellCheckerService):
       case "et"                     => Token.ET
       case "ou"                     => Token.OU
       case "svp"                    => Token.SVP
+      case "farmer"                 => Token.MARQUE
+      case "boxer"                  => Token.MARQUE
+      case "wittekop"               => Token.MARQUE
+      case "punkipa"                => Token.MARQUE
+      case "jackhammer"             => Token.MARQUE
+      case "tenebreuse"             => Token.MARQUE
+      case "maison"                 => Token.MARQUE
+      case "cailler"                => Token.MARQUE
+      case "connaitre"              => Token.CONNAITRE
+      case "combien"                => Token.COMBIEN
+      case "commander"              => Token.COMMANDER
+      case "appeler"                => Token.APPELER
+      case "me"                     => Token.ME
+      case "mon"                    => Token.MON
+      case "quel"                   => Token.QUEL
+      case "couter"                 => Token.COUTER
+      case "sante"                  => Token.SANTE
+      case "solde"                  => Token.SOLDE
       case "bad"                    => Token.BAD
       case _                        => Token.UNKNOWN
 

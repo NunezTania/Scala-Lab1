@@ -26,6 +26,23 @@ object Dictionary:
     "et" -> "et",
     "ou" -> "ou",
     "svp" -> "svp",
-    "stp" -> "svp"
+    "stp" -> "svp",
+    "maison" -> "maison",
+    "cailler" -> "cailler",
+    "farmer" -> "farmer",
+    "boxer" -> "boxer",
+    "wittekop" -> "wittekop",
+    "punkipa" -> "punkipa",
+    "jackhammer" ->  "jackhammer",
+    "ténébreuse" -> "tenebreuse",
+    "connaître" -> "connaitre",
+    "combien" -> "combien",
+    "commander" -> "commander",
+    "appeler" -> "appeler",
+    "solde" -> "solde",
+    "coûte" -> "couter",
+    "mon" -> "mon",
+    "me" -> "me",
+    "m" -> "me"
   )
 end Dictionary

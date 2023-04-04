@@ -56,7 +56,7 @@ class AccountImpl extends AccountService:
       accounts.update(user, accounts.getOrElse(user, 0.0) - amount)
       accounts.getOrElse(user, 0.0)
     else
-      // exception
-      0.0 // default value that we choose to return if the account does not exist
+      0.0
+      // new Exception("Account does not exist")
 
 end AccountImpl

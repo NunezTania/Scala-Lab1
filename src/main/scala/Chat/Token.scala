@@ -19,7 +19,7 @@ enum Token:
     OU,
     // Products
     PRODUIT,
-    //Marques
+    // Marques
     MARQUE,
     // Util
     PSEUDO,
@@ -32,9 +32,12 @@ enum Token:
     CONNAITRE,
     COUTER,
     SANTE,
-    // Nouveaux tokens labo 2
+    PRIX,
+    LE,
+    DE,
 
     EOL,
     UNKNOWN,
     BAD
 end Token
+

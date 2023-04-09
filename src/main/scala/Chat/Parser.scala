@@ -39,15 +39,102 @@ class Parser(tokenized: Tokenized):
   /** the root method of the parser: parses an entry phrase */
   // TODO - Part 2 Step 4
   def parsePhrases(): ExprTree =
+
     if curToken == BONJOUR then readToken()
-    if curToken == JE then
-      readToken()
-      eat(ETRE)
-      if curToken == ASSOIFFE then
+
+    curToken match
+      case JE =>
+        readToken()
+        curToken match
+
+          case ETRE =>
+            readToken()
+            curToken match
+              case ASSOIFFE | AFFAME =>
+                parseStateOFMind()
+              case PSEUDO =>
+                parsePseudo()
+              case _ => expected(ASSOIFFE, AFFAME, PSEUDO)
+
+          case ME =>
+            readToken()
+            if curToken == APPELER then
+              readToken()
+              parsePseudo()
+            else expected(APPELER)
+
+          case VOULOIR =>
+            readToken()
+            curToken match
+              case CONNAITRE =>
+                readToken()
+                if curToken == MON then
+                  readToken()
+                  if curToken == SOLDE then
+                    readToken()
+                    CheckBalance
+                  else expected(SOLDE)
+                else expected(MON)
+              case COMMANDER =>
+                readToken()
+                Order(parseCommand())
+              case _ => expected(COMMANDER, CONNAITRE)
+
+          case _ => expected(ETRE, ME, VOULOIR)
+
+      case QUEL =>
+        readToken()
+        if curToken == ETRE then
+          readToken()
+          if curToken == LE then
+            readToken()
+            if curToken == PRIX then
+              readToken()
+              Price(parseCommand())
+            else expected(PRIX)
+          else expected(LE)
+        else expected(ETRE)
+
+      case COMBIEN =>
+        readToken()
+        if curToken == COUTER then
+          readToken()
+          Price(parseCommand())
+        else expected(COUTER)
+
+      case _ => expected(BONJOUR, JE, QUEL, VOULOIR)
+
+  def parseStateOFMind(): ExprTree =
+    curToken match
+      case ASSOIFFE =>
         readToken()
         Thirsty
-      else if curToken == AFFAME then
+      case AFFAME =>
         readToken()
         Hungry
-      else expected(ASSOIFFE, AFFAME)
-    else expected(BONJOUR, JE)
+      case _ => expected(ASSOIFFE, AFFAME)
+
+  def parsePseudo(): ExprTree =
+    val pseudo = eat(PSEUDO)
+    Pseudo(pseudo)
+
+  def parseCommand(): ExprTree.ProductAndLogic =
+    if curToken == NUM then
+      val num = eat(NUM).toInt
+      if curToken == PRODUIT then
+        val productType = eat(PRODUIT)
+        val brand: Option[String] =
+          if curToken == MARQUE then Option(eat(MARQUE))
+          else None
+        val prod = Product(num, productType, brand)
+        curToken match
+          case ET =>
+            readToken()
+            And(prod, parseCommand())
+          case OU =>
+            readToken()
+            Or(prod, parseCommand())
+          case _ =>
+            prod
+      else expected(PRODUIT)
+    else expected(NUM)

@@ -11,19 +11,19 @@ class ProductImpl extends ProductService:
   // TODO - Part 2 Step 2
   def getPrice(product: ProductName, brand: String): Double =
     product match
-      case "Bieres" =>
+      case "biere" =>
         brand match
-          case "Boxer"      => 1.0
-          case "Farmer"     => 1.0
-          case "Wittekop"   => 2.0
-          case "PunkIPA"    => 3.0
-          case "Jackhammer" => 3.0
-          case "Tenebreuse" => 4.0
+          case "boxer"      => 1.0
+          case "farmer"     => 1.0
+          case "wittekop"   => 2.0
+          case "punkipa"    => 3.0
+          case "jackhammer" => 3.0
+          case "tenebreuse" => 4.0
 
-      case "Croissants" =>
+      case "croissant" =>
         brand match
-          case "Cailler" => 2.0
-          case "Maison"  => 2.0
+          case "cailler" => 2.0
+          case "maison"  => 2.0
 
   def getDefaultBrand(product: ProductName): BrandName =
     product match

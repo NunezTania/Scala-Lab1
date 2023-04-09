@@ -10,34 +10,25 @@ object ExprTree:
   // TODO - Part 2 Step 3
 
   case class Pseudo(name: String) extends ExprTree
-  case class Number(value: Int) extends ExprTree
-
-  sealed trait ProductType extends ExprTree
-  case object Croissant extends ProductType
-  case object Biere extends ProductType
-
-  sealed trait Politeness extends ExprTree
-  case class Want(politeness: String) extends Politeness
 
   sealed trait StateOfMind extends ExprTree
   case object Thirsty extends StateOfMind
   case object Hungry extends StateOfMind
 
-  case class Identification(name: Pseudo) extends ExprTree
-
+  sealed trait ProductAndLogic extends ExprTree
   case class Product(
-      quantity: Number,
-      productType: ProductType,
-      brand: String
-  ) extends ExprTree
+      quantity: Int,
+      productType: String,
+      brand: Option[String]
+  ) extends ProductAndLogic
 
-  // todo home made: change type ExprTree to smth more specific
-  case class And(left: ExprTree, right: ExprTree) extends ExprTree
-  case class Or(left: ExprTree, right: ExprTree) extends ExprTree
+  case class And(left: ProductAndLogic, right: ProductAndLogic)
+      extends ProductAndLogic
+  case class Or(left: ProductAndLogic, right: ProductAndLogic)
+      extends ProductAndLogic
 
-  case class Command(politeness: Politeness, products: Seq[Product])
-      extends ExprTree
+  case class Order(products: ProductAndLogic) extends ExprTree
 
   case object CheckBalance extends ExprTree
 
-  case class Price(products: Seq[Product]) extends ExprTree
+  case class Price(products: ProductAndLogic) extends ExprTree

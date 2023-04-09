@@ -17,7 +17,7 @@ trait AccountService:
     * @param balance
     *   the initial balance value
     */
-  def addAccount(user: String, balance: Double): Unit
+  def addAccount(user: String, balance: Double = 30): Unit
 
   /** Indicate is an account exist
     * @param user
@@ -45,7 +45,7 @@ class AccountImpl extends AccountService:
   def getAccountBalance(user: String): Double =
     accounts.getOrElse(user, 0.0)
 
-  def addAccount(user: String, balance: Double): Unit =
+  def addAccount(user: String, balance: Double = 30): Unit =
     accounts.put(user, balance)
 
   def isAccountExisting(user: String): Boolean =
@@ -55,8 +55,6 @@ class AccountImpl extends AccountService:
     if isAccountExisting(user) then
       accounts.update(user, accounts.getOrElse(user, 0.0) - amount)
       accounts.getOrElse(user, 0.0)
-    else
-      0.0
-      // new Exception("Account does not exist")
+    else throw new Exception("Account does not exist")
 
 end AccountImpl

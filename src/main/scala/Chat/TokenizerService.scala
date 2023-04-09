@@ -41,7 +41,7 @@ class TokenizerService(spellCheckerSvc: SpellCheckerService):
       case "je"                     => Token.JE
       case "etre"                   => Token.ETRE
       case "vouloir"                => Token.VOULOIR
-      case "asssoiffe"              => Token.ASSOIFFE
+      case "assoiffe"               => Token.ASSOIFFE
       case "affame"                 => Token.AFFAME
       case "biere"                  => Token.PRODUIT
       case "croissant"              => Token.PRODUIT
@@ -67,6 +67,9 @@ class TokenizerService(spellCheckerSvc: SpellCheckerService):
       case "sante"                  => Token.SANTE
       case "solde"                  => Token.SOLDE
       case "bad"                    => Token.BAD
+      case "prix"                   => Token.PRIX
+      case "le"                     => Token.LE
+      case "de"                     => Token.DE
       case _                        => Token.UNKNOWN
 
 end TokenizerService

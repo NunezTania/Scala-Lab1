@@ -21,7 +21,7 @@ class AnalyzerService(productSvc: ProductService, accountSvc: AccountService):
       case Product(quantity, productType, brand) =>
         productSvc.getPrice(
           productType.toString,
-          brand.toString
+          brand.getOrElse(productSvc.getDefaultBrand(productType.toString))
         ) * quantity
       case Order(products) => computePrice(products)
       case Price(products) => computePrice(products)
@@ -41,6 +41,7 @@ class AnalyzerService(productSvc: ProductService, accountSvc: AccountService):
       case Hungry =>
         "Pas de soucis, nous pouvons notamment vous offrir des croissants faits maisons !"
       case Pseudo(name) =>
+        if !accountSvc.isAccountExisting(name) then accountSvc.addAccount(name)
         session.setCurrentUser(name)
         s"Bonjour, ${name.toLowerCase().tail} !"
 

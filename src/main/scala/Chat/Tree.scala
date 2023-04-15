@@ -10,8 +10,6 @@ object ExprTree:
   // TODO - Part 2 Step 3
 
   case class Pseudo(name: String) extends ExprTree
-  case class Num(value: Int) extends ExprTree
-  case class Politesse() extends ExprTree
 
   sealed trait StateOfMind extends ExprTree
   case object Thirsty extends StateOfMind

@@ -77,5 +77,7 @@ class AnalyzerService(productSvc: ProductService, accountSvc: AccountService):
 
       case Price(products) =>
         "Cela coute " + computePrice(t) + " CHF."
+        
+      case _ => "Expression non reconnue."
 
 end AnalyzerService

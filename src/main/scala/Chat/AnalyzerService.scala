@@ -20,8 +20,8 @@ class AnalyzerService(productSvc: ProductService, accountSvc: AccountService):
         else computePrice(right)
       case Product(quantity, productType, brand) =>
         productSvc.getPrice(
-          productType.toString,
-          brand.getOrElse(productSvc.getDefaultBrand(productType.toString))
+          productType,
+          brand.getOrElse(productSvc.getDefaultBrand(productType))
         ) * quantity
       case Order(products) => computePrice(products)
       case Price(products) => computePrice(products)
@@ -38,7 +38,7 @@ class AnalyzerService(productSvc: ProductService, accountSvc: AccountService):
       // TODO - Part 2 Step 3
       case Thirsty =>
         "Eh bien, la chance est de votre cote, car nous offrons les meilleures bieres de la region !"
-      case Hungry =>
+      case Hungry =>  
         "Pas de soucis, nous pouvons notamment vous offrir des croissants faits maisons !"
       case Pseudo(name) =>
         if !accountSvc.isAccountExisting(name) then accountSvc.addAccount(name)
@@ -47,7 +47,8 @@ class AnalyzerService(productSvc: ProductService, accountSvc: AccountService):
 
       case Product(quantity, productType, brand) =>
         val price = computePrice(t)
-        s" $quantity $productType $brand"
+        val b = brand.getOrElse(productSvc.getDefaultBrand(productType))
+        s" $quantity $productType $b"
 
       case And(left, right) => inner(left) + " et " + inner(right)
 
@@ -65,7 +66,7 @@ class AnalyzerService(productSvc: ProductService, accountSvc: AccountService):
           if price > accountSvc.getAccountBalance(currentUser) then
             "Vous n'avez pas assez d'argent !"
           else
-            s"Vous avez commande ${inner(products)} pour un total de $price CHF. Votre nouveau solde est de ${accountSvc
+            s"Voici donc ${inner(products)} ! Cela coûte $price CHF et votre nouveau solde est de ${accountSvc
                 .purchase(currentUser, price)} CHF."
 
       case CheckBalance =>

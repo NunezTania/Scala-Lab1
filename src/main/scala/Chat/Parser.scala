@@ -102,15 +102,19 @@ class Parser(tokenized: Tokenized):
       case _ => expected(ASSOIFFE, AFFAME)
 
   def produits(): ExprTree =
+    def _produits(acc : ExprTree): ExprTree =
+      curToken match
+        case ET =>
+          readToken()
+          val prod = produit()
+          _produits(And(acc, prod))
+        case OU =>
+          readToken()
+          val prod = produit()
+          _produits(Or(acc, prod))
+        case _ => acc
     val prod = produit()
-    curToken match
-      case ET =>
-        readToken()
-        And(prod, produits())
-      case OU =>
-        readToken()
-        Or(prod, produits())
-      case _ => prod
+    _produits(prod)
   
   def commande(): ExprTree =
     eat(COMMANDER)

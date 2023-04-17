@@ -27,7 +27,7 @@ class ProductImpl extends ProductService:
 
   def getDefaultBrand(product: ProductName): BrandName =
     product match
-      case "Bieres"     => "Boxer"
-      case "Croissants" => "Cailler"
+      case "biere"     => "boxer"
+      case "croissant" => "maison"
 
 end ProductImpl

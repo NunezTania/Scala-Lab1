@@ -35,34 +35,28 @@ class Parser(tokenized: Tokenized):
     throw new UnexpectedTokenException(
       s"Expected: $expectedTokens, found: $curToken"
     )
-
+    
   /** the root method of the parser: parses an entry phrase */
-  // TODO - Part 2 Step 4
   def parsePhrases(): ExprTree =
-
     if curToken == BONJOUR then readToken()
-
     curToken match
       case JE =>
         readToken()
         curToken match
-
           case ETRE =>
             readToken()
             curToken match
               case ASSOIFFE | AFFAME =>
-                parseStateOFMind()
+                etatAme()
               case PSEUDO =>
-                parsePseudo()
+                pseudo()
               case _ => expected(ASSOIFFE, AFFAME, PSEUDO)
-
           case ME =>
             readToken()
             if curToken == APPELER then
               readToken()
-              parsePseudo()
+              pseudo()
             else expected(APPELER)
-
           case VOULOIR =>
             readToken()
             curToken match
@@ -72,39 +66,31 @@ class Parser(tokenized: Tokenized):
                   readToken()
                   if curToken == SOLDE then
                     readToken()
-                    CheckBalance
+                    solde()
                   else expected(SOLDE)
                 else expected(MON)
               case COMMANDER =>
-                readToken()
-                Order(parseCommand())
+                commande()
               case _ => expected(COMMANDER, CONNAITRE)
-
           case _ => expected(ETRE, ME, VOULOIR)
+      case QUEL | COMBIEN =>
+        prix()
+      case _ => expected(BONJOUR, JE, QUEL, COMBIEN)
 
-      case QUEL =>
-        readToken()
-        if curToken == ETRE then
-          readToken()
-          if curToken == LE then
-            readToken()
-            if curToken == PRIX then
-              readToken()
-              Price(parseCommand())
-            else expected(PRIX)
-          else expected(LE)
-        else expected(ETRE)
+  def pseudo(): ExprTree =
+    val pseudo = eat(PSEUDO)
+    Pseudo(pseudo)
 
-      case COMBIEN =>
-        readToken()
-        if curToken == COUTER then
-          readToken()
-          Price(parseCommand())
-        else expected(COUTER)
+  def produit(): ExprTree =
+    val quantite = eat(NUM)
+    val typeProduit = eat(PRODUIT)
+    val marque = curToken match
+      case MARQUE =>
+        Some(eat(MARQUE))
+      case _ => None
+    Product(quantite.toInt, typeProduit, marque)
 
-      case _ => expected(BONJOUR, JE, QUEL, VOULOIR)
-
-  def parseStateOFMind(): ExprTree =
+  def etatAme(): ExprTree =
     curToken match
       case ASSOIFFE =>
         readToken()
@@ -114,27 +100,39 @@ class Parser(tokenized: Tokenized):
         Hungry
       case _ => expected(ASSOIFFE, AFFAME)
 
-  def parsePseudo(): ExprTree =
-    val pseudo = eat(PSEUDO)
-    Pseudo(pseudo)
+  def produits(): ExprTree =
+    // Introduction d'une méthode interne récursive avec accumulateur pour associativité gauche
+    def _produits(acc : ExprTree): ExprTree =
+      curToken match
+        case ET =>
+          readToken()
+          val prod = produit()
+          _produits(And(acc, prod))
+        case OU =>
+          readToken()
+          val prod = produit()
+          _produits(Or(acc, prod))
+        case _ => acc
+    // On passe le premier produit lu comme accumulateur pour construire l'arbre de gauche à droite
+    _produits(produit())
+  
+  def commande(): ExprTree =
+    eat(COMMANDER)
+    Order(produits())
 
-  def parseCommand(): ExprTree.ProductAndLogic =
-    if curToken == NUM then
-      val num = eat(NUM).toInt
-      if curToken == PRODUIT then
-        val productType = eat(PRODUIT)
-        val brand: Option[String] =
-          if curToken == MARQUE then Option(eat(MARQUE))
-          else None
-        val prod = Product(num, productType, brand)
-        curToken match
-          case ET =>
-            readToken()
-            And(prod, parseCommand())
-          case OU =>
-            readToken()
-            Or(prod, parseCommand())
-          case _ =>
-            prod
-      else expected(PRODUIT)
-    else expected(NUM)
+  def solde(): ExprTree = CheckBalance
+  
+  def prix(): ExprTree =
+    curToken match
+      case QUEL =>
+        readToken()
+        val etre = eat(ETRE)
+        val le = eat(LE)
+        val prix = eat(PRIX)
+        val de = eat(DE)
+        Price(produits())
+      case COMBIEN =>
+        readToken()
+        val couter = eat(COUTER)
+        Price(produits())
+      case _ => expected(QUEL, COMBIEN)

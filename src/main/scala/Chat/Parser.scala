@@ -37,7 +37,6 @@ class Parser(tokenized: Tokenized):
     )
     
   /** the root method of the parser: parses an entry phrase */
-  // TODO - Part 2 Step 4
   def parsePhrases(): ExprTree =
     if curToken == BONJOUR then readToken()
     curToken match
@@ -102,6 +101,7 @@ class Parser(tokenized: Tokenized):
       case _ => expected(ASSOIFFE, AFFAME)
 
   def produits(): ExprTree =
+    // Introduction d'une méthode interne récursive avec accumulateur pour associativité gauche
     def _produits(acc : ExprTree): ExprTree =
       curToken match
         case ET =>
@@ -113,8 +113,8 @@ class Parser(tokenized: Tokenized):
           val prod = produit()
           _produits(Or(acc, prod))
         case _ => acc
-    val prod = produit()
-    _produits(prod)
+    // On passe le premier produit lu comme accumulateur pour construire l'arbre de gauche à droite
+    _produits(produit())
   
   def commande(): ExprTree =
     eat(COMMANDER)
@@ -130,11 +130,9 @@ class Parser(tokenized: Tokenized):
         val le = eat(LE)
         val prix = eat(PRIX)
         val de = eat(DE)
-        val prod = produits()
-        Price(prod)
+        Price(produits())
       case COMBIEN =>
         readToken()
         val couter = eat(COUTER)
-        val prod = produits()
-        Price(prod)
+        Price(produits())
       case _ => expected(QUEL, COMBIEN)

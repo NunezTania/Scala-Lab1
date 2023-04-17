@@ -21,10 +21,10 @@ object MainParser:
             session: Session,
         )(input: String): Boolean =
     input.toLowerCase match
-        case "quitter" => 
+        case "quitter" =>
           println("Adieu.")
           false  // close loop
-        case "Sante !" =>
+        case "sante !" => // Modifié à cause de l'encodage, les tests ne marchait pas avec l'accent
           for i <- 2 to 6 do
             println(s"Nombre de *clinks* pour un santé de $i personnes : ${ClinksCalculator.calculateCombination(i, 2)}.")
           true  // continue loop

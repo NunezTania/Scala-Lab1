@@ -52,7 +52,7 @@ class AnalyzerService(productSvc: ProductService, accountSvc: AccountService):
         s" $quantity $productType $b"
       case And(left, right) => inner(left) + " et " + inner(right)
       case Or(left, right) =>
-        if (computePrice(left) > computePrice(right)) then inner(left)
+        if (computePrice(left) < computePrice(right)) then inner(left)
         else inner(right)
       case Order(products) =>
         if session.getCurrentUser.isEmpty then

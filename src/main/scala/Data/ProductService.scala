@@ -29,5 +29,4 @@ class ProductImpl extends ProductService:
     product match
       case "biere"     => "boxer"
       case "croissant" => "maison"
-
 end ProductImpl

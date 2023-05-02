@@ -8,7 +8,6 @@ sealed trait ExprTree
   */
 object ExprTree:
   // TODO - Part 2 Step 3
-
   case class Pseudo(name: String) extends ExprTree
 
   sealed trait StateOfMind extends ExprTree

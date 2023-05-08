@@ -8,7 +8,7 @@ import scalatags.Text.tags2._
  */
 object Layouts:
     // You can use it to store your methods to generate ScalaTags.
-    def homePage(msgList: List[(String, Option[String], String)]) = {
+    def homePage(msgList: List[(String, Option[List[String]], String)]) = {
         html(
             header("/resources/css/main.css", "/resources/js/main.js"),
             homePageNav(),
@@ -32,21 +32,26 @@ object Layouts:
         )
     }
 
-    def homePageBody(msgList: List[(String, Option[String], String)]) = {
+    def homePageBody(msgList: List[(String, Option[List[String]], String)]) = {
         body(
-            div(`class` := "content")(
-                div(id := "boardMessage")(
-                    if msgList.isEmpty then "Please wait, the message are loading !" else for mess <- msgList yield message(mess._1, mess._2, mess._3)),
-                messagesForm()
-            ),
+            boardMessage(msgList)
         )
     }
 
-    def message(author: String, mention: Option[String], message: String) = {
+    def boardMessage(msgList: List[(String, Option[List[String]], String)]) = {
+        div(`class` := "content")(
+                div(id := "boardMessage")(
+                    if msgList.isEmpty then "Please wait, the message are loading !" 
+                    else msgList.map((msg) => message(msg._1, msg._2, msg._3))),
+                messagesForm()
+            )
+    }
+
+    def message(author: String, mentions: Option[List[String]], message: String) = {
       div(`class` := "msg")(
         span(`class` := "author")(author),
         span(`class` := "msg-content")(
-          span(`class` := "mention")(mention.getOrElse("")),
+          span(`class` := "mention")(mentions.getOrElse(List()).foldLeft("")((a, b) => a + ", " + b)),
           message
         )
       )

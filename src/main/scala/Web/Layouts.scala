@@ -27,7 +27,7 @@ object Layouts:
         nav(
             a(`class` := "nav-brand")("Bot-tender"),
             div(`class` := "nav-item")(
-                a(href := "/")("Log in"),
+                a(href := "/login")("Log in"),
             ),
         )
     }
@@ -65,5 +65,68 @@ object Layouts:
         input(`type` := "submit", value := "Envoyer")
       )
     }
+
+    def loginPage() = {
+        html(
+            header("/resources/css/main.css", "/resources/js/main.js"),
+            loginPageNav(),
+            loginPageBody()
+        )
+    }
+
+    def loginPageNav()= {
+        nav(
+            a(`class` := "nav-brand")("Bot-tender"),
+            div(`class` := "nav-item")(
+                a(href := "/")("Go to the message board"),
+            ),
+        )
+    }
+
+    def loginPageBody() = {
+        body(
+            loginBoard(),
+            registerBoard()
+        )
+    }
+
+    def loginBoard() = {
+        div(`class` := "content")(
+            h1("Login"),
+          
+            div(id := "loginBoard")(
+                loginForm()
+            )
+        )
+    }
+
+    def registerBoard() = {
+        div(`class` := "content")(
+            h1("Register"),
+            div(id := "registerBoard")(
+                registerForm()
+            )
+        )
+    }
+
+    def loginForm() = {
+      form(id := "loginForm", onsubmit := "submitLoginForm(); return false;")(
+        div(id := "errorDiv", `class` := "errorMsg"),
+        label(`for` := "loginInput")("Username:"),
+        input(`type` := "text", id := "loginInput", placeholder := "Write your username"),
+        input(`type` := "submit", value := "Envoyer")
+      )
+    }
+
+    def registerForm() = {
+      form(id := "registerForm", onsubmit := "submitRegisterForm(); return false;")(
+        div(id := "errorDiv", `class` := "errorMsg"),
+        label(`for` := "registerInput")("Username:"),
+        input(`type` := "text", id := "registerInput", placeholder := "Write your username"),
+        input(`type` := "submit", value := "Envoyer")
+      )
+    }
+
+
 
 end Layouts

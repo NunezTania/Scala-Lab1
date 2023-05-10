@@ -7,6 +7,8 @@ import scalatags.Text.tags2._
   */
 object Layouts:
   // You can use it to store your methods to generate ScalaTags.
+
+  // --------------------- homePage ---------------------
   def homePage(msgList: List[(String, Option[List[String]], String)]) = {
     html(
       header("/resources/css/main.css", "/resources/js/main.js"),
@@ -76,11 +78,13 @@ object Layouts:
     )
   }
 
-  def loginPage() = {
+  // ----------------- Login page -----------------
+
+  def loginPage(error: Option[(Int, String)]) = {
     html(
       header("/resources/css/main.css", "/resources/js/main.js"),
       loginPageNav(),
-      loginPageBody()
+      loginPageBody(error: Option[(Int, String)])
     )
   }
 
@@ -93,25 +97,31 @@ object Layouts:
     )
   }
 
-  def loginPageBody() = {
+  def loginPageBody(error: Option[(Int, String)]) = {
     body(
-      loginBoard(),
-      registerBoard()
+      loginBoard(error: Option[(Int, String)]),
+      registerBoard(error: Option[(Int, String)])
     )
   }
 
-  def loginBoard() = {
+  def loginBoard(error: Option[(Int, String)]) = {
     div(`class` := "content")(
       h1("Login"),
+      if error.isDefined && error.get._1 == 0 then
+        div(id := "errorDiv", `class` := "errorMsg")(error.get._2)
+      else div(),
       div(id := "loginBoard")(
         loginForm()
       )
     )
   }
 
-  def registerBoard() = {
+  def registerBoard(error: Option[(Int, String)]) = {
     div(`class` := "content")(
       h1("Register"),
+      if error.isDefined && error.get._1 == 1 then
+        div(id := "errorDiv", `class` := "errorMsg")(error.get._2)
+      else div(),
       div(id := "registerBoard")(
         registerForm()
       )
@@ -133,18 +143,88 @@ object Layouts:
   }
 
   def registerForm() = {
-    form(
-      id := "registerForm",
-      onsubmit := "submitRegisterForm(); return false;"
-    )(
+    form(id := "registerForm", action := "/register", method := "post")(
       div(id := "errorDiv", `class` := "errorMsg"),
       label(`for` := "registerInput")("Username:"),
       input(
         `type` := "text",
         id := "registerInput",
+        name := "username",
         placeholder := "Write your username"
       ),
       input(`type` := "submit", value := "Envoyer")
+    )
+  }
+
+  // ----------------- Successful login page -----------------
+
+  def successfulLoginPage(username: String) = {
+    html(
+      header("/resources/css/main.css", "/resources/js/main.js"),
+      successfulLoginPageNav(),
+      successfulLoginPageBody(username)
+    )
+  }
+
+  def successfulLoginPageNav() = {
+    nav(
+      a(`class` := "nav-brand")("Bot-tender"),
+      div(`class` := "nav-item")(
+        a(href := "/")("Go to the message board")
+      )
+    )
+  }
+
+  def successfulLoginPageBody(username: String) = {
+    body(
+      div(`class` := "content")(
+        h1("Welcome " + username),
+        p("You have successfully logged in !")
+      )
+    )
+  }
+
+  // ----------------- Successful register page -----------------
+  def successfulRegisterPage(username: String) = {
+    html(
+      header("/resources/css/main.css", "/resources/js/main.js"),
+      successfulRegisterPageNav(),
+      successfulRegisterPageBody(username)
+    )
+  }
+
+  def successfulRegisterPageNav() = {
+    nav(
+      a(`class` := "nav-brand")("Bot-tender"),
+      div(`class` := "nav-item")(
+        a(href := "/")("Go to the message board")
+      )
+    )
+  }
+
+  def successfulRegisterPageBody(username: String) = {
+    body(
+      div(`class` := "content")(
+        h1("Welcome " + username + " !"),
+        p("You have successfully registered !")
+      )
+    )
+  }
+
+  // ----------------- Logout page -----------------
+  def logoutPage() = {
+    html(
+      header("/resources/css/main.css", "/resources/js/main.js"),
+      logoutPageBody()
+    )
+  }
+
+  def logoutPageBody() = {
+    body(
+      div(`class` := "content")(
+        h1("You have successfully logged out !"),
+        p("See you soon")
+      )
     )
   }
 

@@ -66,6 +66,15 @@ object Layouts:
       )
     }
 
+    def messagesForm(error : String) = {
+      form(id := "msgForm", onsubmit := "submitMessageForm(); return false;")(
+        div(id := "errorDiv", `class` := "errorMsg", value := error),
+        label(`for` := "msgInput")("Your message:"),
+        input(`type` := "text", id := "msgInput", placeholder := "Write your message"),
+        input(`type` := "submit", value := "Envoyer")
+      )
+    }
+
     def loginPage() = {
         html(
             header("/resources/css/main.css", "/resources/js/main.js"),
@@ -109,8 +118,17 @@ object Layouts:
         )
     }
 
+    def customForm(id_ : String, action_ : String, formName : String) = {
+      form(id := "loginForm", action := "/login", method :="POST")(
+        div(id := "errorDiv", `class` := "errorMsg"),
+        label(`for` := "loginInput")("Username:"),
+        input(`type` := "text", id := "loginInput", placeholder := "Write your username"),
+        input(`type` := "submit", value := "Envoyer")
+      )
+    }
+
     def loginForm() = {
-      form(id := "loginForm", onsubmit := "submitLoginForm(); return false;")(
+      form(id := "loginForm", action := "/login", method :="POST")(
         div(id := "errorDiv", `class` := "errorMsg"),
         label(`for` := "loginInput")("Username:"),
         input(`type` := "text", id := "loginInput", placeholder := "Write your username"),
@@ -119,7 +137,7 @@ object Layouts:
     }
 
     def registerForm() = {
-      form(id := "registerForm", onsubmit := "submitRegisterForm(); return false;")(
+      form(id := "registerForm", action := "/register", method := "POST")(
         div(id := "errorDiv", `class` := "errorMsg"),
         label(`for` := "registerInput")("Username:"),
         input(`type` := "text", id := "registerInput", placeholder := "Write your username"),

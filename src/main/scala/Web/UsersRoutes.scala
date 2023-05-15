@@ -28,6 +28,12 @@ class UsersRoutes(accountSvc: AccountService, sessionSvc: SessionService)(
   //      register page.
   //
   // TODO - Part 3 Step 3d: Reset the current session and display a successful logout page.
-
+  @cask.post("/login")
+  def login(username: String) =
+    accountSvc.isAccountExisting(username) match
+      case true =>
+        "User exists"
+      case false =>
+        "User does not exist"
   initialize()
 end UsersRoutes

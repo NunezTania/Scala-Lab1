@@ -1,7 +1,10 @@
 package Web
 
 import scalatags.Text.all._
-import scalatags.Text.tags2._
+import scalatags.Text.tags2.nav
+// import the type Username from MessageService
+import Data.MessageService.Username
+import Data.MessageService.MsgContent
 
 /** Assembles the method used to layout ScalaTags
   */
@@ -9,11 +12,14 @@ object Layouts:
   // You can use it to store your methods to generate ScalaTags.
 
   // --------------------- homePage ---------------------
-  def homePage(msgList: List[(String, Option[List[String]], String)]) = {
+  def homePage(
+      msgList: Seq[(Username, MsgContent)],
+      error: Option[String] = None
+  ) = {
     html(
       header("/resources/css/main.css", "/resources/js/main.js"),
       homePageNav(),
-      homePageBody(msgList)
+      homePageBody(msgList, error)
     )
   }
 
@@ -33,22 +39,36 @@ object Layouts:
     )
   }
 
-  def homePageBody(msgList: List[(String, Option[List[String]], String)]) = {
+  def homePageBody(
+      msgList: Seq[(Username, MsgContent)],
+      error: Option[String] = None
+  ) = {
     body(
-      boardMessage(msgList)
+      boardMessage(msgList, error)
     )
   }
 
-  def boardMessage(msgList: List[(String, Option[List[String]], String)]) = {
+  def boardMessage(
+      msgList: Seq[(Username, MsgContent)],
+      error: Option[String] = None
+  ) = {
     div(`class` := "content")(
       div(id := "boardMessage")(
         if msgList.isEmpty then "Please wait, the message are loading !"
-        else msgList.map((msg) => message(msg._1, msg._2, msg._3))
+        else msgList.map((msg) => message(msg._1, msg._2))
       ),
-      messagesForm()
+      messagesForm(error)
     )
   }
 
+  def message(author: Username, message: MsgContent) = {
+    div(`class` := "msg")(
+      span(`class` := "author")(author),
+      span(`class` := "msg-content")(message)
+    )
+  }
+
+  /*
   def message(
       author: String,
       mentions: Option[List[String]],
@@ -64,17 +84,27 @@ object Layouts:
       )
     )
   }
+   */
 
-  def messagesForm() = {
-    form(id := "msgForm", onsubmit := "submitMessageForm(); return false;")(
-      div(id := "errorDiv", `class` := "errorMsg"),
-      label(`for` := "msgInput")("Your message:"),
-      input(
-        `type` := "text",
-        id := "msgInput",
-        placeholder := "Write your message"
-      ),
-      input(`type` := "submit", value := "Envoyer")
+  def messagesForm(error: Option[String] = None) = {
+    div(id := "messagesForm")(
+      if error.isDefined then
+        div(id := "errorDiv", `class` := "errorMsg")(error.get)
+      else div(),
+      form(
+        form(
+          id := "msgForm",
+          attr("onsubmit") := "submitMessageForm();return false",
+          div(id := "errorDiv", `class` := "errorMsg"),
+          label("Your message:", attr("for") := "messageInput"),
+          input(
+            attr("type") := "text",
+            placeholder := "Write your message",
+            id := "messageInput"
+          ),
+          input(attr("type") := "submit")
+        )
+      )
     )
   }
 

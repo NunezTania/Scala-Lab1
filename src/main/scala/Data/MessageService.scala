@@ -6,7 +6,7 @@ import scalatags.Text.Frag
 
 object MessageService:
   type Username = String
-  type MsgContent = Frag
+  type MsgContent = Frag  
 
 trait MessageService:
   /** Retrieve the latest N added messages

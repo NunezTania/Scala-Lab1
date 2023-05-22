@@ -73,6 +73,7 @@ class MessagesRoutes(
               val id =
                 msgSvc.add(user, message, Some("bot"), Option(expr), None)
               openConnections.foreach(displayMessages(_))
+              
               msgSvc.add(
                 "bot",
                 Layouts.message("bot", reply),

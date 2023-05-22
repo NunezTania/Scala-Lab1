@@ -3,8 +3,9 @@ package Web
 import Chat.{AnalyzerService, TokenizerService}
 import Data.{MessageService, AccountService, SessionService, Session}
 import scalatags.Text.all.stringFrag
+import scalatags.Text.all._
 import castor.Context.Simple.global
-import cask.util.Ws.Event
+import MessageService.{Username, MsgContent}
 
 /** Assembles the routes dealing with the message board:
   *   - One route to display the home page
@@ -50,7 +51,8 @@ class MessagesRoutes(
 
   @getSession(sessionSvc)
   @cask.postJson("/send")
-  def postMessage(msg: ujson.Value)(session: Session) = {
+  def postMessage(msg: String)(session: Session) = {
+
     session.getCurrentUser match
       case Some(user) => {
         if (msg.isNull) {
@@ -61,11 +63,13 @@ class MessagesRoutes(
           msgSvc.add(user, "AsgContent", None, None, None)
 
           // notify every other user with the last 20 messages
-          openConnections.foreach(_.send(cask.Ws.Text(msg.toString)))
+          openConnections.foreach(displayMessages(_))
           ujson.Obj("success" -> true, "err" -> "")
         }
       }
       case None => {
+        msgSvc.add("Anonymous", "AsgContent", None, None, None)
+
         ujson.Obj(
           "success" -> false,
           "err" -> "You must be logged in to send a message"
@@ -79,18 +83,39 @@ class MessagesRoutes(
   @cask.websocket("/subscribe")
   def subscribe() = {
     cask.WsHandler { connection =>
-      if (!openConnections.contains(connection)) openConnections += connection
+
+      openConnections += connection
+      displayMessages(connection)
+
       cask.WsActor {
-        case cask.Ws.Text(msg) =>
-          if (msg == "ping") {
-            connection.send(cask.Ws.Text("pong"))
-          } else {
-            connection.send(cask.Ws.Text("Error: unknown message"))
-          }
-        case cask.Ws.Binary(data) => connection.send(cask.Ws.Binary(data))
-        case cask.Ws.Close(_, _) => openConnections -= connection
+        case cask.Ws.Close(_, _) => {
+          openConnections -= connection
+        }
       }
     }
+  }
+
+  private def displayMessages(
+      connection: cask.WsChannelActor
+  ) = {
+
+    val layout =
+      if msgSvc.getLatestMessages(20).isEmpty then
+        div("No messages have been sent yet").toString
+      else
+        msgSvc
+          .getLatestMessages(20)
+          .reverse
+          .map((author, content) => Layouts.message(author, content).toString)
+          .reduceLeft(_ + _)
+
+    // concatenate the messages into a single string
+    connection.send(
+      cask.Ws
+        .Text(
+          layout
+        )
+    )
   }
 
   // TODO - Part 3 Step 4d: Delete the message history when a GET is made to `/clearHistory`

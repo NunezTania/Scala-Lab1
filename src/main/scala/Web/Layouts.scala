@@ -54,7 +54,7 @@ object Layouts:
   ) = {
     div(`class` := "content")(
       div(id := "boardMessage")(
-        if msgList.isEmpty then "Please wait, the message are loading !"
+        if msgList.isEmpty then "There's no message"
         else msgList.map((msg) => message(msg._1, msg._2))
       ),
       messagesForm(error)
@@ -91,18 +91,18 @@ object Layouts:
       if error.isDefined then
         div(id := "errorDiv", `class` := "errorMsg")(error.get)
       else div(),
-        form(
-          id := "msgForm",
-          onsubmit := "submitMessageForm();return false",
-          div(id := "errorDiv", `class` := "errorMsg"),
-          label("Your message:", attr("for") := "messageInput"),
-          input(
-            attr("type") := "text",
-            placeholder := "Write your message",
-            id := "messageInput"
-          ),
-          input(attr("type") := "submit")
-        )
+      form(
+        id := "msgForm",
+        attr("onsubmit") := "submitMessageForm(); return false;",
+        div(id := "errorDiv", `class` := "errorMsg"),
+        label("Your message:", attr("for") := "messageInput"),
+        input(
+          attr("type") := "text",
+          placeholder := "Write your message",
+          id := "messageInput"
+        ),
+        input(attr("type") := "submit")
+      )
     )
   }
 

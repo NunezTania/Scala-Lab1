@@ -49,10 +49,10 @@ class UsersRoutes(accountSvc: AccountService, sessionSvc: SessionService)(
   @getSession(sessionSvc)
   @cask.postForm("/register")
   def postRegister(username: String)(session: Session) = {
-    accountSvc.isAccountExisting(username) match {
+    accountSvc.isAccountExisting(username) || username.isEmpty() match {
       case true =>
         Layouts.loginPage(error =
-          Some(1, "The specified username already exists !")
+          Some(1, "The specified username isn't valid !")
         )
       case false => {
         accountSvc.addAccount(username)

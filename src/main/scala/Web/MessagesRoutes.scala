@@ -6,6 +6,9 @@ import scalatags.Text.all.stringFrag
 import scalatags.Text.all._
 import castor.Context.Simple.global
 import MessageService.{Username, MsgContent}
+import pprint.StringPrefix
+import Chat.Parser
+import Chat.UnexpectedTokenException
 
 /** Assembles the routes dealing with the message board:
   *   - One route to display the home page
@@ -58,18 +61,51 @@ class MessagesRoutes(
         if (msg == "") {
           ujson.Obj("success" -> false, "err" -> "The message is empty")
         } else {
-          // separate the msg into msgContent, mention, exprType, replyToId
-          // val msgContent = ujson.read(msg)("msg").str
-          msgSvc.add(user, "AsgContent", None, None, None)
 
-          // notify every other user with the last 20 messages
-          openConnections.foreach(displayMessages(_))
-          ujson.Obj("success" -> true, "err" -> "")
+          // check for bot mention
+          if (msg.startsWith("@bot ")) then {
+            try {
+              val message = msg.stripPrefix("@bot ")
+              val tokenize = tokenizerSvc.tokenize(message.toLowerCase())
+              val parser = new Parser(tokenize)
+              val expr = parser.parsePhrases()
+              val reply = analyzerSvc.reply(session)(expr)
+              val id =
+                msgSvc.add(user, message, Some("bot"), Option(expr), None)
+              openConnections.foreach(displayMessages(_))
+              msgSvc.add(
+                "bot",
+                Layouts.message("bot", reply),
+                Some(user),
+                None,
+                Option(id)
+              )
+              openConnections.foreach(displayMessages(_))
+              ujson.Obj("success" -> true, "err" -> "")
+            } catch
+              case e: Exception =>
+                ujson.Obj("success" -> false, "err" -> e.getMessage())
+          } else {
+
+            // verifier mention
+            val mention = if (msg.startsWith("@")) then {
+              val mention = msg.split(" ")(0).stripPrefix("@")
+              Some(mention)
+            } else {
+              None
+            }
+            val message = if (mention.isDefined) then {
+              msg.stripPrefix("@" + mention.get)
+            } else {
+              msg
+            }
+            msgSvc.add(user, message, mention, None, None)
+            openConnections.foreach(displayMessages(_))
+            ujson.Obj("success" -> true, "err" -> "")
+          }
         }
       }
       case None => {
-        msgSvc.add("Anonymous", "AsgContent", None, None, None)
-
         ujson.Obj(
           "success" -> false,
           "err" -> "You must be logged in to send a message"

@@ -58,7 +58,7 @@ class MessagesRoutes(
 
     session.getCurrentUser match
       case Some(user) => {
-        if (msg.isNull) {
+        if (msg.isEmpty()) {
           ujson.Obj("success" -> false, "err" -> "The message is empty")
         } else {
 
@@ -72,15 +72,16 @@ class MessagesRoutes(
               val reply = analyzerSvc.reply(session)(expr)
               val id =
                 msgSvc.add(user, message, Some("bot"), Option(expr), None)
-              openConnections.foreach(displayMessages(_))
-              
+              // openConnections.foreach(displayMessages(_))
+
               msgSvc.add(
                 "bot",
-                Layouts.message("bot", reply),
+                reply,
                 Some(user),
                 None,
                 Option(id)
               )
+
               openConnections.foreach(displayMessages(_))
               ujson.Obj("success" -> true, "err" -> "")
             } catch
@@ -95,12 +96,7 @@ class MessagesRoutes(
             } else {
               None
             }
-            val message = if (mention.isDefined) then {
-              msg.stripPrefix("@" + mention.get)
-            } else {
-              msg
-            }
-            msgSvc.add(user, message, mention, None, None)
+            msgSvc.add(user, msg, mention, None, None)
             openConnections.foreach(displayMessages(_))
             ujson.Obj("success" -> true, "err" -> "")
           }

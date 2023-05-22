@@ -34,7 +34,7 @@ class MessagesRoutes(
   ) // This decorator fills the `(session: Session)` part of the `index` method.
   @cask.get("/")
   def index()(session: Session) = {
-    Layouts.homePage(msgSvc.getLatestMessages(20), None)
+    Layouts.homePage(msgSvc.getLatestMessages(20), None, session.getCurrentUser.isDefined)
   }
 
   @getSession(sessionSvc)

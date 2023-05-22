@@ -16,11 +16,12 @@ object Layouts:
   // --------------------- homePage ---------------------
   def homePage(
       msgList: Seq[(Username, MsgContent)],
-      error: Option[String] = None
+      error: Option[String] = None,
+      logged : Boolean = false
   ) = {
     html(
       header("/resources/css/main.css", "/resources/js/main.js"),
-      homePageNav(),
+      homePageNav(logged),
       homePageBody(msgList, error)
     )
   }
@@ -32,11 +33,12 @@ object Layouts:
     )
   }
 
-  def homePageNav() = {
+  def homePageNav(logged : Boolean = false) = {
     nav(
       a(`class` := "nav-brand")("Bot-tender"),
       div(`class` := "nav-item")(
-        a(href := "/login")("Log in")
+        if logged then a(href := "/logout")("Log out")
+        else a(href := "/login")("Log in")
       )
     )
   }
@@ -234,6 +236,7 @@ object Layouts:
   def logoutPageBody() = {
     body(
       div(`class` := "content")(
+        a(href := "/")("Go to the message board"),
         h1("You have successfully logged out !"),
         p("See you soon")
       )

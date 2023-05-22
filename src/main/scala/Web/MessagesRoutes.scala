@@ -58,7 +58,7 @@ class MessagesRoutes(
 
     session.getCurrentUser match
       case Some(user) => {
-        if (msg == "") {
+        if (msg.isNull) {
           ujson.Obj("success" -> false, "err" -> "The message is empty")
         } else {
 

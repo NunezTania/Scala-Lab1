@@ -9,7 +9,9 @@ import Data.MessageService.MsgContent
 /** Assembles the method used to layout ScalaTags
   */
 object Layouts:
-  // You can use it to store your methods to generate ScalaTags.
+  // Ce fichier n'est pas du tout optimisé. Les fonctions sont répétitives et
+  // il y a beaucoup de code dupliqué. Il est possible de factoriser le code,
+  // mais nous manquons de temps pour le faire.
 
   // --------------------- homePage ---------------------
   def homePage(
@@ -67,24 +69,6 @@ object Layouts:
       span(`class` := "msg-content")(message)
     )
   }
-
-  /*
-  def message(
-      author: String,
-      mentions: Option[List[String]],
-      message: String
-  ) = {
-    div(`class` := "msg")(
-      span(`class` := "author")(author),
-      span(`class` := "msg-content")(
-        span(`class` := "mention")(
-          mentions.getOrElse(List()).foldLeft("")((a, b) => a + ", " + b)
-        ),
-        message
-      )
-    )
-  }
-   */
 
   def messagesForm(error: Option[String] = None) = {
     div(id := "messagesForm")(

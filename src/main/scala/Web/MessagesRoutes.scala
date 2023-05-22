@@ -4,6 +4,7 @@ import Chat.{AnalyzerService, TokenizerService}
 import Data.{MessageService, AccountService, SessionService, Session}
 import scalatags.Text.all.stringFrag
 import castor.Context.Simple.global
+import cask.util.Ws.Event
 
 /** Assembles the routes dealing with the message board:
   *   - One route to display the home page
@@ -49,10 +50,10 @@ class MessagesRoutes(
 
   @getSession(sessionSvc)
   @cask.postJson("/send")
-  def postMessage(msg: String)(session: Session) = {
+  def postMessage(msg: ujson.Value)(session: Session) = {
     session.getCurrentUser match
       case Some(user) => {
-        if (msg == "") {
+        if (msg.isNull) {
           ujson.Obj("success" -> false, "err" -> "The message is empty")
         } else {
           // separate the msg into msgContent, mention, exprType, replyToId
@@ -60,7 +61,7 @@ class MessagesRoutes(
           msgSvc.add(user, "AsgContent", None, None, None)
 
           // notify every other user with the last 20 messages
-          openConnections.foreach(_.send(cask.Ws.Text(msg)))
+          openConnections.foreach(_.send(cask.Ws.Text(msg.toString)))
           ujson.Obj("success" -> true, "err" -> "")
         }
       }
@@ -77,16 +78,17 @@ class MessagesRoutes(
 
   @cask.websocket("/subscribe")
   def subscribe() = {
-    // store the new websocket connection in the session
     cask.WsHandler { connection =>
+      if (!openConnections.contains(connection)) openConnections += connection
       cask.WsActor {
-        case cask.Ws.Text(msg) => {
-          openConnections += connection
-          connection.send(cask.Ws.Text(msg))
-        }
-        case cask.Ws.Close(_, _) => {
-          openConnections -= connection
-        }
+        case cask.Ws.Text(msg) =>
+          if (msg == "ping") {
+            connection.send(cask.Ws.Text("pong"))
+          } else {
+            connection.send(cask.Ws.Text("Error: unknown message"))
+          }
+        case cask.Ws.Binary(data) => connection.send(cask.Ws.Binary(data))
+        case cask.Ws.Close(_, _) => openConnections -= connection
       }
     }
   }

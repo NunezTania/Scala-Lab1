@@ -91,10 +91,9 @@ object Layouts:
       if error.isDefined then
         div(id := "errorDiv", `class` := "errorMsg")(error.get)
       else div(),
-      form(
         form(
           id := "msgForm",
-          attr("onsubmit") := "submitMessageForm();return false",
+          onsubmit := "submitMessageForm();return false",
           div(id := "errorDiv", `class` := "errorMsg"),
           label("Your message:", attr("for") := "messageInput"),
           input(
@@ -104,7 +103,6 @@ object Layouts:
           ),
           input(attr("type") := "submit")
         )
-      )
     )
   }
 

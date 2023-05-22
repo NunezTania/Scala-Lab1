@@ -33,7 +33,7 @@ class MessagesRoutes(
   @cask.get("/")
   def index()(session: Session) = {
     // TODO - Part 3 Step 2: Display the home page (with the message board and the form to send new messages)
-    Layouts.homePage(msgSvc.getLatestMessages(20), session.getCurrentUser)
+    Layouts.homePage(msgSvc.getLatestMessages(20), None)
   }
   // session.getCurrentUser.map(u => s"You are logged in as ${u} !")
   //      .getOrElse("You are not logged in !")
@@ -58,15 +58,14 @@ class MessagesRoutes(
 
     session.getCurrentUser match
       case Some(user) => {
-        if (msg.isNull) {
+        if (msg.isEmpty()) {
           ujson.Obj("success" -> false, "err" -> "The message is empty")
         } else {
-
           // check for bot mention
-          if (msg.startsWith("@bot ")) then {
+          if (msg.startsWith("@bot")) then {
             try {
-              val message = msg.stripPrefix("@bot ")
-              val tokenize = tokenizerSvc.tokenize(message.toLowerCase())
+              val message = msg.stripPrefix("@bot").toLowerCase
+              val tokenize = tokenizerSvc.tokenize(message)
               val parser = new Parser(tokenize)
               val expr = parser.parsePhrases()
               val reply = analyzerSvc.reply(session)(expr)
@@ -84,7 +83,7 @@ class MessagesRoutes(
               openConnections.foreach(displayMessages(_))
               ujson.Obj("success" -> true, "err" -> "")
             } catch
-              case e: Exception =>
+              case e : Exception =>
                 ujson.Obj("success" -> false, "err" -> e.getMessage())
           } else {
 

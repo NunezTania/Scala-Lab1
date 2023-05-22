@@ -33,7 +33,7 @@ class MessagesRoutes(
   @cask.get("/")
   def index()(session: Session) = {
     // TODO - Part 3 Step 2: Display the home page (with the message board and the form to send new messages)
-    Layouts.homePage(msgSvc.getLatestMessages(20), session.getCurrentUser)
+    Layouts.homePage(msgSvc.getLatestMessages(20), None)
   }
   // session.getCurrentUser.map(u => s"You are logged in as ${u} !")
   //      .getOrElse("You are not logged in !")
@@ -72,7 +72,6 @@ class MessagesRoutes(
               val reply = analyzerSvc.reply(session)(expr)
               val id =
                 msgSvc.add(user, message, Some("bot"), Option(expr), None)
-              // openConnections.foreach(displayMessages(_))
 
               msgSvc.add(
                 "bot",
@@ -138,7 +137,6 @@ class MessagesRoutes(
       else
         msgSvc
           .getLatestMessages(20)
-          .reverse
           .map((author, content) => Layouts.message(author, content).toString)
           .reduceLeft(_ + _)
 

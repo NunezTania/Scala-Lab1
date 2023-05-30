@@ -74,4 +74,10 @@ class AnalyzerService(productSvc: ProductService, accountSvc: AccountService):
       case Price(products) =>
         ("Cela coute " + computePrice(t) + " CHF.", None)
 
+  def getProductList(order : ExprTree) : List[Product] =
+    order match
+      case Product(quantity, productType, brand) => List(Product(quantity, productType, brand))
+      case And(left, right) => getProductList(left) ++ getProductList(right)
+      case Or(left, right) => if computePrice(left) < computePrice(right) then getProductList(left) else getProductList(right)
+      case unexpected => throw new UnexpectedExprTreeException(s"Expected: Products or Product, found: $unexpected")
 end AnalyzerService

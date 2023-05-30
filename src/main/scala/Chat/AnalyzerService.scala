@@ -35,43 +35,43 @@ class AnalyzerService(productSvc: ProductService, accountSvc: AccountService):
     * @return
     *   the output text of the current node
     */
-  def reply(session: Session)(t: ExprTree): String =
-    val inner: ExprTree => String = reply(session)
+  def reply(session: Session)(t: ExprTree): (String, Option[String]) =
+    val inner: ExprTree => (String, Option[String]) = reply(session)
     t match
       case Thirsty =>
-        "Eh bien, la chance est de votre cote, car nous offrons les meilleures bieres de la region !"
+        ("Eh bien, la chance est de votre cote, car nous offrons les meilleures bieres de la region !", None)
       case Hungry =>  
-        "Pas de soucis, nous pouvons notamment vous offrir des croissants faits maisons !"
+        ("Pas de soucis, nous pouvons notamment vous offrir des croissants faits maisons !", None)
       case Pseudo(name) =>
         if !accountSvc.isAccountExisting(name) then accountSvc.addAccount(name)
         session.setCurrentUser(name)
-        s"Bonjour, ${name.toLowerCase().tail} !"
+        (s"Bonjour, ${name.toLowerCase().tail} !", None)
       case Product(quantity, productType, brand) =>
         val price = computePrice(t)
         val b = brand.getOrElse(productSvc.getDefaultBrand(productType))
-        s" $quantity $productType $b"
-      case And(left, right) => inner(left) + " et " + inner(right)
+        (s" $quantity $productType $b", None)
+      case And(left, right) => (inner(left)._1 + " et " + inner(right)._1, None)
       case Or(left, right) =>
         if (computePrice(left) < computePrice(right)) then inner(left)
         else inner(right)
       case Order(products) =>
         if session.getCurrentUser.isEmpty then
-          "Veuillez d'abord vous identifier !"
+          ("Veuillez d'abord vous identifier !", None)
         else
           val price = computePrice(t)
           val currentUser = session.getCurrentUser.get
 
           if price > accountSvc.getAccountBalance(currentUser) then
-            "Vous n'avez pas assez d'argent !"
+            ("Vous n'avez pas assez d'argent !", None)
           else
-            s"Voici donc ${inner(products)} ! Cela coûte $price CHF et votre nouveau solde est de ${accountSvc
-                .purchase(currentUser, price)} CHF."
+            (s"Votre commande est en cours de préparation : ${inner(products)._1}", Some(s"Voici donc tamer! Cela coûte $price CHF et votre nouveau solde est de ${accountSvc
+                .purchase(currentUser, price)} CHF."))
       case CheckBalance =>
         session.getCurrentUser match
           case Some(user) =>
-            s"Votre solde est de ${accountSvc.getAccountBalance(user)} CHF."
-          case None => "Vous n'etes pas connecte !"
+            (s"Votre solde est de ${accountSvc.getAccountBalance(user)} CHF.", None)
+          case None => ("Vous n'etes pas connecte !" , None)
       case Price(products) =>
-        "Cela coute " + computePrice(t) + " CHF."
+        ("Cela coute " + computePrice(t) + " CHF.", None)
 
 end AnalyzerService

@@ -9,6 +9,7 @@ import MessageService.{Username, MsgContent}
 import pprint.StringPrefix
 import Chat.Parser
 import Chat.UnexpectedTokenException
+import Chat.ExprTree.Order
 
 /** Assembles the routes dealing with the message board:
   *   - One route to display the home page
@@ -67,20 +68,12 @@ class MessagesRoutes(
                     Option(id)
                   )
                   Thread.sleep(5000)
-                case _ =>
-                  msgSvc.add(
-                    "bot",
-                    reply,
-                    Some(user),
-                    None,
-                    Option(id)
-                  )
 
               openConnections.foreach(displayMessages(_))
 
               msgSvc.add(
                 "bot",
-                reply,
+                reply._1,
                 Some(user),
                 None,
                 Option(id)

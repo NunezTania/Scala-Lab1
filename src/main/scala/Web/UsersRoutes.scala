@@ -17,7 +17,6 @@ import Web.Decorators.getSession
 class UsersRoutes(accountSvc: AccountService, sessionSvc: SessionService)(
     implicit val log: cask.Logger
 ) extends cask.Routes:
-  // TODO - Part 3 Step 3a: Display a login form and register form page for the following URL: `/login`.
 
   @getSession(sessionSvc)
   @cask.get("/login")
@@ -25,9 +24,6 @@ class UsersRoutes(accountSvc: AccountService, sessionSvc: SessionService)(
     Layouts.loginPage(None)
   }
 
-  // TODO - Part 3 Step 3b: Process the login information sent by the form with POST to `/login`,
-  //      set the user in the provided session (if the user exists) and display a successful or
-  //      failed login page.
   @getSession(sessionSvc)
   @cask.postForm("/login")
   def postLogin(username: String)(session: Session) = {
@@ -43,16 +39,14 @@ class UsersRoutes(accountSvc: AccountService, sessionSvc: SessionService)(
     }
   }
 
-  // TODO - Part 3 Step 3c: Process the register information sent by the form with POST to `/register`,
-  //      create the user, set the user in the provided session and display a successful
-  //      register page.
+
   @getSession(sessionSvc)
   @cask.postForm("/register")
   def postRegister(username: String)(session: Session) = {
-    accountSvc.isAccountExisting(username) match {
+    accountSvc.isAccountExisting(username) || username.isEmpty() match {
       case true =>
         Layouts.loginPage(error =
-          Some(1, "The specified username already exists !")
+          Some(1, "The specified username isn't valid !")
         )
       case false => {
         accountSvc.addAccount(username)
@@ -62,7 +56,6 @@ class UsersRoutes(accountSvc: AccountService, sessionSvc: SessionService)(
     }
   }
 
-  // TODO - Part 3 Step 3d: Reset the current session and display a successful logout page.
   @getSession(sessionSvc)
   @cask.get("/logout")
   def logout()(session: Session) = {

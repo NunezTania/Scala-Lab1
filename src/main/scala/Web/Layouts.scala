@@ -1,19 +1,28 @@
 package Web
 
 import scalatags.Text.all._
-import scalatags.Text.tags2._
+import scalatags.Text.tags2.nav
+// import the type Username from MessageService
+import Data.MessageService.Username
+import Data.MessageService.MsgContent
 
 /** Assembles the method used to layout ScalaTags
   */
 object Layouts:
-  // You can use it to store your methods to generate ScalaTags.
+  // Ce fichier n'est pas du tout optimisé. Les fonctions sont répétitives et
+  // il y a beaucoup de code dupliqué. Il est possible de factoriser le code,
+  // mais nous manquons de temps pour le faire.
 
   // --------------------- homePage ---------------------
-  def homePage(msgList: List[(String, Option[List[String]], String)]) = {
+  def homePage(
+      msgList: Seq[(Username, MsgContent)],
+      error: Option[String] = None,
+      logged : Boolean = false
+  ) = {
     html(
       header("/resources/css/main.css", "/resources/js/main.js"),
-      homePageNav(),
-      homePageBody(msgList)
+      homePageNav(logged),
+      homePageBody(msgList, error)
     )
   }
 
@@ -24,57 +33,62 @@ object Layouts:
     )
   }
 
-  def homePageNav() = {
+  def homePageNav(logged : Boolean = false) = {
     nav(
       a(`class` := "nav-brand")("Bot-tender"),
       div(`class` := "nav-item")(
-        a(href := "/login")("Log in")
+        if logged then a(href := "/logout")("Log out")
+        else a(href := "/login")("Log in")
       )
     )
   }
 
-  def homePageBody(msgList: List[(String, Option[List[String]], String)]) = {
+  def homePageBody(
+      msgList: Seq[(Username, MsgContent)],
+      error: Option[String] = None
+  ) = {
     body(
-      boardMessage(msgList)
+      boardMessage(msgList, error)
     )
   }
 
-  def boardMessage(msgList: List[(String, Option[List[String]], String)]) = {
+  def boardMessage(
+      msgList: Seq[(Username, MsgContent)],
+      error: Option[String] = None
+  ) = {
     div(`class` := "content")(
       div(id := "boardMessage")(
-        if msgList.isEmpty then "Please wait, the message are loading !"
-        else msgList.map((msg) => message(msg._1, msg._2, msg._3))
+        if msgList.isEmpty then "There's no message"
+        else msgList.map((msg) => message(msg._1, msg._2))
       ),
-      messagesForm()
+      messagesForm(error)
     )
   }
 
-  def message(
-      author: String,
-      mentions: Option[List[String]],
-      message: String
-  ) = {
+  def message(author: Username, message: MsgContent) = {
     div(`class` := "msg")(
       span(`class` := "author")(author),
-      span(`class` := "msg-content")(
-        span(`class` := "mention")(
-          mentions.getOrElse(List()).foldLeft("")((a, b) => a + ", " + b)
-        ),
-        message
-      )
+      span(`class` := "msg-content")(message)
     )
   }
 
-  def messagesForm() = {
-    form(id := "msgForm", onsubmit := "submitMessageForm(); return false;")(
-      div(id := "errorDiv", `class` := "errorMsg"),
-      label(`for` := "msgInput")("Your message:"),
-      input(
-        `type` := "text",
-        id := "msgInput",
-        placeholder := "Write your message"
-      ),
-      input(`type` := "submit", value := "Envoyer")
+  def messagesForm(error: Option[String] = None) = {
+    div(id := "messagesForm")(
+      if error.isDefined then
+        div(id := "errorDiv", `class` := "errorMsg")(error.get)
+      else div(),
+      form(
+        id := "msgForm",
+        attr("onsubmit") := "submitMessageForm(); return false;",
+        div(id := "errorDiv", `class` := "errorMsg"),
+        label("Your message:", attr("for") := "messageInput"),
+        input(
+          attr("type") := "text",
+          placeholder := "Write your message",
+          id := "messageInput"
+        ),
+        input(attr("type") := "submit")
+      )
     )
   }
 
@@ -222,6 +236,7 @@ object Layouts:
   def logoutPageBody() = {
     body(
       div(`class` := "content")(
+        a(href := "/")("Go to the message board"),
         h1("You have successfully logged out !"),
         p("See you soon")
       )

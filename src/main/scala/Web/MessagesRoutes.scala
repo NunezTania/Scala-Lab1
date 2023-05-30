@@ -57,6 +57,27 @@ class MessagesRoutes(
               val id =
                 msgSvc.add(user, message, Some("bot"), Option(expr), None)
 
+              expr match
+                case Order(products) =>
+                  msgSvc.add( // Préparation de la commande
+                    "bot",
+                    "Votre commande est en cours de préparation : " + products.toString(),
+                    Some(user),
+                    None,
+                    Option(id)
+                  )
+                  Thread.sleep(5000)
+                case _ =>
+                  msgSvc.add(
+                    "bot",
+                    reply,
+                    Some(user),
+                    None,
+                    Option(id)
+                  )
+
+              openConnections.foreach(displayMessages(_))
+
               msgSvc.add(
                 "bot",
                 reply,

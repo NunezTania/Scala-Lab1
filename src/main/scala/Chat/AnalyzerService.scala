@@ -1,6 +1,7 @@
 package Chat
 import Data.{AccountService, ProductService, Session}
 import Chat.ExprTree.Order
+import Utils.FutureOps
 
 class UnexpectedExprTreeException(msg: String) extends Exception(msg) {}
 
@@ -64,6 +65,11 @@ class AnalyzerService(productSvc: ProductService, accountSvc: AccountService):
           if price > accountSvc.getAccountBalance(currentUser) then
             ("Vous n'avez pas assez d'argent !", None)
           else
+            val prodlist = getProductList(products).map(p => {
+              val (mean, std, r) = productSvc.getPreparationParameters(p.productType, p.brand.getOrElse(productSvc.getDefaultBrand(p.productType)))
+              (p, FutureOps.randomSchedule(mean, std, r))
+            })
+            // TODO: flatmap pour les futures
             (s"Votre commande est en cours de préparation : ${inner(products)._1}", Some(s"Voici donc tamer! Cela coûte $price CHF et votre nouveau solde est de ${accountSvc
                 .purchase(currentUser, price)} CHF."))
       case CheckBalance =>

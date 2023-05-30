@@ -8,6 +8,7 @@ trait ProductService:
 
   def getPrice(product: ProductName, brand: BrandName): Double
   def getDefaultBrand(product: ProductName): BrandName
+  def getPreparationParameters(product: ProductName, brand: BrandName): (Duration, Duration, Double)
 
 class ProductImpl extends ProductService:
   // TODO - Part 2 Step 2

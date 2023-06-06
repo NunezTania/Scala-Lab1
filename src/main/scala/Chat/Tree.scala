@@ -15,10 +15,12 @@ object ExprTree:
   case object Hungry extends StateOfMind
 
   sealed trait ProductAndLogic extends ExprTree
+    
   case class Product(
       quantity: Int,
       productType: String,
       brand: Option[String]
+
   ) extends ExprTree
 
   case class And(left: ExprTree, right: ExprTree)

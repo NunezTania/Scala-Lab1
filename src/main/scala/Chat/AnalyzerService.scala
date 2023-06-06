@@ -2,6 +2,9 @@ package Chat
 import Data.{AccountService, ProductService, Session}
 import Chat.ExprTree.Order
 import Utils.FutureOps
+import scala.util.{Failure, Success, Try}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class UnexpectedExprTreeException(msg: String) extends Exception(msg) {}
 
@@ -36,8 +39,8 @@ class AnalyzerService(productSvc: ProductService, accountSvc: AccountService):
     * @return
     *   the output text of the current node
     */
-  def reply(session: Session)(t: ExprTree): (String, Option[String]) =
-    val inner: ExprTree => (String, Option[String]) = reply(session)
+  def reply(session: Session)(t: ExprTree): (String, Option[Future[String]]) =
+    val inner: ExprTree => (String, Option[Future[String]]) = reply(session)
     t match
       case Thirsty =>
         ("Eh bien, la chance est de votre cote, car nous offrons les meilleures bieres de la region !", None)
@@ -65,13 +68,14 @@ class AnalyzerService(productSvc: ProductService, accountSvc: AccountService):
           if price > accountSvc.getAccountBalance(currentUser) then
             ("Vous n'avez pas assez d'argent !", None)
           else
-            val prodlist = getProductList(products).map(p => {
+            val prodlist = Future.sequence(getProductList(products).map(p => {
               val (mean, std, r) = productSvc.getPreparationParameters(p.productType, p.brand.getOrElse(productSvc.getDefaultBrand(p.productType)))
-              (p, FutureOps.randomSchedule(mean, std, r))
-            })
-            // TODO: flatmap pour les futures
-            (s"Votre commande est en cours de préparation : ${inner(products)._1}", Some(s"Voici donc tamer! Cela coûte $price CHF et votre nouveau solde est de ${accountSvc
-                .purchase(currentUser, price)} CHF."))
+              FutureOps.randomSchedule(mean, std, r).transformWith {
+                case Success(_) => Future.successful(p)
+                case Failure(e) => Future.failed(e)
+              }
+            }))
+            (s"Votre commande est en cours de préparation : ${inner(products)._1}", Some(Future("bsus")))
       case CheckBalance =>
         session.getCurrentUser match
           case Some(user) =>

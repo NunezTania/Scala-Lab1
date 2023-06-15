@@ -39,8 +39,8 @@ class AnalyzerService(productSvc: ProductService, accountSvc: AccountService):
     * @return
     *   the output text of the current node
     */
-  def reply(session: Session)(t: ExprTree): (String, Option[Future[String]]) =
-    val inner: ExprTree => (String, Option[Future[String]]) = reply(session)
+  def reply(session: Session)(t: ExprTree): (String, Option[Future[(String, Boolean)]]) =
+    val inner: ExprTree => (String, Option[Future[(String, Boolean)]]) = reply(session)
     t match
       case Thirsty =>
         ("Eh bien, la chance est de votre cote, car nous offrons les meilleures bieres de la region !", None)
@@ -70,9 +70,9 @@ class AnalyzerService(productSvc: ProductService, accountSvc: AccountService):
           else
             val prepared = productSvc.prepareProducts(getProductList(products))
             val prodlist = getProductList(products)
-            val res = prepared.flatMap( l =>
+            val res = (prepared.flatMap( l =>
               Future(prodlist.zip(l).map((prod, nPrepared) => Product(nPrepared, prod.productType, prod.brand))
-               .map(productToSring).reduce((a,b) => a + " et " + b)))
+               .map(productToSring).reduce((a,b) => a + " et " + b), l.reduce((a, b) => a + b) != prodlist.map(_.quantity).reduce((a, b) => a + b))))
             (s"Votre commande est en cours de préparation : ${inner(products)._1}", Some(res))
       case CheckBalance =>
         session.getCurrentUser match

@@ -69,10 +69,11 @@ class MessagesRoutes(
               if (reply._2.isDefined) {
                 val res = reply._2.get
                 res.map {
-                  case msg =>
+                  case (msg, part) =>
+                    val cmdState = if part then "Commande partielle" else "Commande complète"
                     msgSvc.add(
                       "bot",
-                      "Voici " + msg,
+                      cmdState + ", voici " + msg,
                       Some(user),
                       None,
                       Option(id)

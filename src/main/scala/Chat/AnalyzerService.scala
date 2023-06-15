@@ -68,14 +68,15 @@ class AnalyzerService(productSvc: ProductService, accountSvc: AccountService):
           if price > accountSvc.getAccountBalance(currentUser) then
             ("Vous n'avez pas assez d'argent !", None)
           else
-            val prodlist = Future.sequence(getProductList(products).map(p => {
+            val prodlist = getProductList(products).map(p => { // TODO Chainer les futures des produits de même marque
               val (mean, std, r) = productSvc.getPreparationParameters(p.productType, p.brand.getOrElse(productSvc.getDefaultBrand(p.productType)))
               FutureOps.randomSchedule(mean, std, r).transformWith {
-                case Success(_) => Future.successful(p)
+                case Success(_) => Future.successful(s"${p.quantity} ${p.productType} ${p.brand.getOrElse(productSvc.getDefaultBrand(p.productType))}")
                 case Failure(e) => Future.failed(e)
               }
-            }))
-            (s"Votre commande est en cours de préparation : ${inner(products)._1}", Some(Future("bsus")))
+            })
+            val res : Future[String] = prodlist.reduce((a, b) => a.zip(b).map(t => t._1 + " et " + t._2))
+            (s"Votre commande est en cours de préparation : ${inner(products)._1}", Some(res))
       case CheckBalance =>
         session.getCurrentUser match
           case Some(user) =>

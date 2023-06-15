@@ -1,6 +1,7 @@
 package Data
 
 import scala.concurrent.duration.*
+import scala.concurrent.Future
 
 trait ProductService:
   type BrandName = String
@@ -11,6 +12,17 @@ trait ProductService:
   def getPreparationParameters(product: ProductName, brand: BrandName): (Duration, Duration, Double)
 
 class ProductImpl extends ProductService:
+
+  var productPrepMap : Map[(String, String), Option[Future[String]]] = Map[(String, String), Option[Future[String]]](
+    ("biere", "boxer") -> None,
+    ("biere","farmer") -> None,
+    ("biere", "wittekop") -> None,
+    ("biere", "punkipa") -> None,
+    ("biere", "jackhammer") -> None,
+    ("biere", "tenebreuse") -> None,
+    ("croissant", "cailler") -> None,
+    ("croissant", "maison") -> None
+  )
   // TODO - Part 2 Step 2
   def getPrice(product: ProductName, brand: String): Double =
     product match

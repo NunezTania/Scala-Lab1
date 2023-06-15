@@ -22,6 +22,7 @@ class TokenizerService(spellCheckerSvc: SpellCheckerService):
       .replaceAll("'", " ")
       .replaceAll(" {2,}", " ")
       .split(" ")
+      .filter(_.nonEmpty)
       .map(word => spellCheckerSvc.getClosestWordInDictionary(word))
       .map(word => (word, convertWordToToken(word)))
 

@@ -23,7 +23,6 @@ class MessagesRoutes(
     tokenizerSvc: TokenizerService,
     analyzerSvc: AnalyzerService,
     msgSvc: MessageService,
-    msgSvcConcurrent: MessageConcurrentImpl,
     accountSvc: AccountService,
     sessionSvc: SessionService
 )(implicit val log: cask.Logger)
@@ -58,8 +57,8 @@ class MessagesRoutes(
               val expr = parser.parsePhrases()
               val reply = analyzerSvc.reply(session)(expr)
               val id =
-                msgSvcConcurrent.add(user, message, Some("bot"), Option(expr), None)
-              msgSvcConcurrent.add(
+                msgSvc.add(user, message, Some("bot"), Option(expr), None)
+              msgSvc.add(
                 "bot",
                 reply._1,
                 Some(user),
@@ -69,13 +68,16 @@ class MessagesRoutes(
 
               if (reply._2.isDefined) {
                 val res = reply._2.get
-                msgSvcConcurrent.add(
-                  "bot",
-                  "cux",
-                  Some(user),
-                  None,
-                  Option(id)
-                )
+                res.map {
+                  case msg =>
+                    msgSvc.add(
+                      "bot",
+                      msg,
+                      Some(user),
+                      None,
+                      Option(id)
+                    )
+                }
               }
                   
 

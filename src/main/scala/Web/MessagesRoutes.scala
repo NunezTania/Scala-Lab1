@@ -72,11 +72,12 @@ class MessagesRoutes(
                   case msg =>
                     msgSvc.add(
                       "bot",
-                      msg,
+                      "Voici " + msg,
                       Some(user),
                       None,
                       Option(id)
                     )
+                    openConnections.foreach(displayMessages(_))
                 }
               }
                   

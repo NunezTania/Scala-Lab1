@@ -68,14 +68,11 @@ class AnalyzerService(productSvc: ProductService, accountSvc: AccountService):
           if price > accountSvc.getAccountBalance(currentUser) then
             ("Vous n'avez pas assez d'argent !", None)
           else
-            val prodlist = getProductList(products).map(p => { // TODO Chainer les futures des produits de même marque
-              val (mean, std, r) = productSvc.getPreparationParameters(p.productType, p.brand.getOrElse(productSvc.getDefaultBrand(p.productType)))
-              FutureOps.randomSchedule(mean, std, r).transformWith {
-                case Success(_) => Future.successful(s"${p.quantity} ${p.productType} ${p.brand.getOrElse(productSvc.getDefaultBrand(p.productType))}")
-                case Failure(e) => Future.failed(e)
-              }
-            })
-            val res : Future[String] = prodlist.reduce((a, b) => a.zip(b).map(t => t._1 + " et " + t._2))
+            val prepared = productSvc.prepareProducts(getProductList(products))
+            val prodlist = getProductList(products)
+            val res = prepared.flatMap( l =>
+              Future(prodlist.zip(l).map((prod, nPrepared) => Product(nPrepared, prod.productType, prod.brand))
+               .map(productToSring).reduce((a,b) => a + " et " + b)))
             (s"Votre commande est en cours de préparation : ${inner(products)._1}", Some(res))
       case CheckBalance =>
         session.getCurrentUser match
@@ -91,4 +88,7 @@ class AnalyzerService(productSvc: ProductService, accountSvc: AccountService):
       case And(left, right) => getProductList(left) ++ getProductList(right)
       case Or(left, right) => if computePrice(left) < computePrice(right) then getProductList(left) else getProductList(right)
       case unexpected => throw new UnexpectedExprTreeException(s"Expected: Products or Product, found: $unexpected")
+
+  def productToSring(product : Product) : String =
+    product.quantity + " " + product.productType + " " + product.brand.getOrElse(productSvc.getDefaultBrand(product.productType))
 end AnalyzerService

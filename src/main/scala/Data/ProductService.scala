@@ -17,11 +17,12 @@ trait ProductService:
       product: ProductName,
       brand: BrandName
   ): (Duration, Duration, Double)
+  def prepareProducts(products : List[Product]) : Future[List[Int]]
 
 class ProductImpl extends ProductService:
 
-  var productPrepMap: Map[(String, String), Option[Future[Unit]]] =
-    Map[(String, String), Option[Future[Unit]]](
+  var productPrepMap: Map[(String, String), Option[Future[Int]]] =
+    Map[(String, String), Option[Future[Int]]](
       ("biere", "boxer") -> None,
       ("biere", "farmer") -> None,
       ("biere", "wittekop") -> None,
@@ -72,74 +73,28 @@ class ProductImpl extends ProductService:
       case "biere"     => "boxer"
       case "croissant" => "maison"
 
-  def makeProducts(products: List[Product]): List[Future[String]] = {
-    val futures = List()
-
-    for prod <- products do
-
-      val brand = prod.brand.getOrElse(getDefaultBrand(prod.productType))
-
-      val (mean, std, r) = getPreparationParameters(
-        prod.productType,
-        brand
-      )
-      val state = productPrepMap((prod.productType, brand))
-      val count = prod.quantity
-      val (f, nbSucess) = state match
-        case Some(future) =>
-          loopFuture(
-            (mean, std, r),
-            prod.productType,
-            brand,
-            count,
-            future,
-            0
-          )
-        case None => {
-          val future = FutureOps.randomSchedule(mean, std, r)
-          loopFuture(
-            (mean, std, r),
-            prod.productType,
-            brand,
-            count - 1,
-            future,
-            0
-          )
+  def prepareProducts(products : List[Product]) : Future[List[Int]] =
+    def loop(product : Product, acc : Future[Int], n : Int) : Future[Int] =
+      n match
+        case 0 => {
+          productPrepMap = productPrepMap + ((product.productType, product.brand.getOrElse(product.productType)) -> Some(acc))
+          acc
         }
-
-      // update the map with the new future
-      productPrepMap = productPrepMap + ((prod.productType, brand) -> Some(f))
-
-      val message =
-        if (nbSucess == count) then
-          "All products have been prepared successfully"
-        else if (nbSucess == 0) then "No product has been prepared successfully"
-        else s"Only $nbSucess products have been prepared successfully"
-
-      futures.appended(Future(message))
-    futures
-  }
-
-  def loopFuture(
-      params: (Duration, Duration, Double),
-      prodType: String,
-      brand: String,
-      count: Int,
-      acc: Future[Unit],
-      nbSuccess: Int
-  ): (Future[Unit], Int) =
-    if count == 0 then (acc, nbSuccess)
-    else
-      val f = acc.transformWith {
-        case Success(_) => {
-          var success = nbSuccess + 1
-          FutureOps.randomSchedule(params._1, params._2, params._3)
+        case x => {
+          acc flatMap { 
+            case m => {
+              val (mean, std, r) = getPreparationParameters(product.productType, product.brand.getOrElse(getDefaultBrand(product.productType)))
+              FutureOps.randomSchedule(mean, std, r).transformWith( f => f match
+                case Success(value) => loop(product, Future(m + 1), n - 1)
+                case Failure(_) => loop(product, Future(m), n -1)
+            )}
+          }
         }
-        case Failure(_) => {
-          FutureOps.randomSchedule(params._1, params._2, params._3)
-        }
+    Future.sequence(products.map( p => {
+        productPrepMap((p.productType, p.brand.getOrElse(getDefaultBrand(p.productType)))) match
+          case None => loop(p, Future(0), p.quantity)
+          case Some(f) => loop(p, f flatMap {case _ => Future(0)}, p.quantity)
       }
-
-      loopFuture(params, prodType, brand, count - 1, f, nbSuccess)
+    ))
 
 end ProductImpl

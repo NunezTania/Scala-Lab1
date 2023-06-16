@@ -56,11 +56,10 @@ class MessagesRoutes(
               val parser = new Parser(tokenize)
               val expr = parser.parsePhrases()
               val reply = analyzerSvc.reply(session)(expr)
-              val id =
-                msgSvc.add(user, message, Some("bot"), Option(expr), None)
+              val id = msgSvc.add(user, message, Some("bot"), Option(expr), None)
               msgSvc.add(
                 "bot",
-                reply._1,
+                "@" + user + " " + reply._1,
                 Some(user),
                 None,
                 Option(id)
@@ -69,11 +68,10 @@ class MessagesRoutes(
               if (reply._2.isDefined) {
                 val res = reply._2.get
                 res.map {
-                  case (msg, part) =>
-                    val cmdState = if part then "Commande partielle" else "Commande complète"
+                  case msg =>
                     msgSvc.add(
                       "bot",
-                      cmdState + ", voici " + msg,
+                      "@" + user + " " + msg,
                       Some(user),
                       None,
                       Option(id)

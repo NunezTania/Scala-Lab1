@@ -39,8 +39,8 @@ class AnalyzerService(productSvc: ProductService, accountSvc: AccountService):
     * @return
     *   the output text of the current node
     */
-  def reply(session: Session)(t: ExprTree): (String, Option[Future[(String, Boolean)]]) =
-    val inner: ExprTree => (String, Option[Future[(String, Boolean)]]) = reply(session)
+  def reply(session: Session)(t: ExprTree): (String, Option[Future[String]]) =
+    val inner: ExprTree => (String, Option[Future[String]]) = reply(session)
     t match
       case Thirsty =>
         ("Eh bien, la chance est de votre cote, car nous offrons les meilleures bieres de la region !", None)
@@ -62,18 +62,26 @@ class AnalyzerService(productSvc: ProductService, accountSvc: AccountService):
         if session.getCurrentUser.isEmpty then
           ("Veuillez d'abord vous identifier !", None)
         else
-          val price = computePrice(t)
-          val currentUser = session.getCurrentUser.get
-
-          if price > accountSvc.getAccountBalance(currentUser) then
-            ("Vous n'avez pas assez d'argent !", None)
-          else
-            val prepared = productSvc.prepareProducts(getProductList(products))
-            val prodlist = getProductList(products)
-            val res = (prepared.flatMap( l =>
-              Future(prodlist.zip(l).map((prod, nPrepared) => Product(nPrepared, prod.productType, prod.brand))
-               .map(productToSring).reduce((a,b) => a + " et " + b), l.reduce((a, b) => a + b) != prodlist.map(_.quantity).reduce((a, b) => a + b))))
-            (s"Votre commande est en cours de préparation : ${inner(products)._1}", Some(res))
+          val prodlist = getProductList(products)
+          val prepared = productSvc.prepareProducts(prodlist)
+          val res = (prepared.flatMap( l =>
+            val preparedProds : ExprTree = prodlist.zip(l)
+            .map((prod, nPrepared) => Product(nPrepared, prod.productType, prod.brand))
+            .filter(_.quantity > 0)
+            .reduce((a, b) => And(a, b))
+            val price = computePrice(preparedProds)
+            if price > accountSvc.getAccountBalance(session.getCurrentUser.get) then Future("Vous n'avez pas assez d'argent !")
+            else
+              val part = l.reduce((a, b) => a + b) != prodlist.map(_.quantity).reduce((a, b) => a + b)
+              val status = if part then " partiellement" else ""
+              val partialCmd = if part then s" Voici ${inner(preparedProds)._1}" else ""
+              Future(
+                s"La commande de ${inner(products)._1} est" +
+                  status +
+                " prête." +
+                partialCmd +
+                s" Cela coute  $price.- et il vous reste ${accountSvc.purchase(session.getCurrentUser.get, price)} CHF sur votre compte.")))
+          (s"Votre commande est en cours de préparation : ${inner(products)._1}", Some(res))
       case CheckBalance =>
         session.getCurrentUser match
           case Some(user) =>

@@ -6,6 +6,7 @@ import Utils.FutureOps
 import scala.util.Failure
 import scala.util.Success
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.collection.concurrent.TrieMap
 
 trait ProductService:
   type BrandName = String
@@ -21,8 +22,8 @@ trait ProductService:
 
 class ProductImpl extends ProductService:
 
-  var productPrepMap: Map[(String, String), Option[Future[Int]]] =
-    Map[(String, String), Option[Future[Int]]](
+  var productPrepMap: TrieMap[(String, String), Option[Future[Int]]] =
+    TrieMap[(String, String), Option[Future[Int]]](
       ("biere", "boxer") -> None,
       ("biere", "farmer") -> None,
       ("biere", "wittekop") -> None,
@@ -77,7 +78,7 @@ class ProductImpl extends ProductService:
     def loop(product : Product, acc : Future[Int], n : Int) : Future[Int] =
       n match
         case 0 => {
-          productPrepMap = productPrepMap + ((product.productType, product.brand.getOrElse(product.productType)) -> Some(acc))
+          productPrepMap.updateWith((product.productType, product.brand.getOrElse(product.productType)))( _ => Some(Some(acc)))
           acc
         }
         case x => {

@@ -1,6 +1,7 @@
 package Data
 
 import scala.collection.mutable
+import scala.collection.concurrent.TrieMap
 
 trait AccountService:
   /** Retrieve the balance of a given account
@@ -38,7 +39,7 @@ trait AccountService:
   def purchase(user: String, amount: Double): Double
 
 class AccountImpl extends AccountService:
-  private val accounts = mutable.Map[String, Double]()
+  private val accounts = TrieMap[String, Double]()
 
   // TODO - Part 2 Step 2
 

@@ -51,7 +51,7 @@ class MessagesRoutes(
           // check for bot mention
           if (msg.startsWith("@bot")) then {
             try {
-              val message = msg.stripPrefix("@bot").toLowerCase
+              val message = msg.stripPrefix("@bot").toLowerCase.trim()
               val tokenize = tokenizerSvc.tokenize(message)
               val parser = new Parser(tokenize)
               val expr = parser.parsePhrases()
@@ -149,10 +149,10 @@ class MessagesRoutes(
     )
   }
 
-  @getSession(sessionSvc)
   @cask.get("/clearHistory")
-  def clearHistory()(session: Session) = {
+  def clearHistory() = {
     msgSvc.deleteHistory()
+    openConnections.foreach(displayMessages(_))
     Layouts.homePage(List())
   }
 

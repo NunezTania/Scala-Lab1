@@ -18,9 +18,8 @@ class UsersRoutes(accountSvc: AccountService, sessionSvc: SessionService)(
     implicit val log: cask.Logger
 ) extends cask.Routes:
 
-  @getSession(sessionSvc)
   @cask.get("/login")
-  def login()(session: Session) = {
+  def login() = {
     Layouts.loginPage(None)
   }
 
@@ -43,7 +42,8 @@ class UsersRoutes(accountSvc: AccountService, sessionSvc: SessionService)(
   @getSession(sessionSvc)
   @cask.postForm("/register")
   def postRegister(username: String)(session: Session) = {
-    accountSvc.isAccountExisting(username) || username.isEmpty() match {
+    accountSvc.isAccountExisting(username) || username.isEmpty() 
+    || username.trim().isEmpty() || username == "bot" match {
       case true =>
         Layouts.loginPage(error =
           Some(1, "The specified username isn't valid !")
